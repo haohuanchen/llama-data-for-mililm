@@ -1,0 +1,8 @@
+model_name: "Public"
+data_path: "./data/Public.jsonl"
+save_path: "./models/minilm-l6-custom"
+batch_size: 64
+epochs: 10
+max_len: 128
+lr: 5e-6
+device: "cuda"

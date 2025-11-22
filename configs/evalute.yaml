@@ -1,0 +1,2 @@
+model_revision: "v1"
+load_path: "./models/minilm-l6-custom"
