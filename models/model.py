@@ -11,7 +11,7 @@ tokenizer = AutoTokenizer.from_pretrained("intfloat/multilingual-e5-base")
 
 
 class MultiHeadSelfAttention(nn.Module):
-    def __init__(self, hidden_size=384, num_heads=6, dropout=0.1):
+    def __init__(self, hidden_size=384, num_heads=12, dropout=0.1):
         super().__init__()
         assert hidden_size % num_heads == 0
         self.num_heads = num_heads
@@ -49,14 +49,14 @@ class TransformerBlock(nn.Module):
     def __init__(self, hidden_size=384, num_heads=6, ffn_dim=1536, dropout=0.1):
         super().__init__()
         self.attn = MultiHeadSelfAttention(hidden_size, num_heads, dropout)
-        self.norm1 = nn.LayerNorm(hidden_size)
+        self.norm1 = nn.LayerNorm(hidden_size, eps=1e-12)
         self.ffn = nn.Sequential(
             nn.Linear(hidden_size, ffn_dim),
             nn.GELU(),
             nn.Linear(ffn_dim, hidden_size),
             nn.Dropout(dropout)
         )
-        self.norm2 = nn.LayerNorm(hidden_size)
+        self.norm2 = nn.LayerNorm(hidden_size, eps=1e-12)
         
     def forward(self, x, mask=None):
         # Self-Attention + Residual
@@ -106,11 +106,9 @@ class MiniLMSentenceTransformer(nn.Module):
             x = layer(x, attention_mask)
         
         # mean pooling
-        if attention_mask is None:
-            sentence_emb = x.mean(dim=1)
-        else:
-            mask = attention_mask.unsqueeze(-1)
-            sentence_emb = (x * mask).sum(dim=1) / mask.sum(dim=1).clamp(min=1e-9)
+        mask = attention_mask.unsqueeze(-1)
+        sentence_emb = (x * mask).sum(dim=1) / mask.sum(dim=1).clamp(min=1e-9)
+
         return sentence_emb
     
     def encode(self, inputs, batch_size=16, device='cpu', **kwargs):

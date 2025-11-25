@@ -1,7 +1,7 @@
 #!/bin/bash
 
 models=(
-    "Llama8B_STS:5e-6:1"
+    "Llama8B_STS:5e-6:10"
     # "Llama8B_Bitext:2e-6:10"
     # "Llama8B:2e-6:10"
 
