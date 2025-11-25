@@ -1,12 +1,12 @@
 #!/bin/bash
 
 models=(
-    "Llama8B_sts:5e-6:1"
-    # "Llama8B_bitext:2e-6:10"
+    "Llama8B_STS:5e-6:1"
+    # "Llama8B_Bitext:2e-6:10"
     # "Llama8B:2e-6:10"
 
-    # "Llama70B_sts:5e-6:10"
-    # "Llama70B_bitext:2e-6:10"
+    # "Llama70B_STS:5e-6:10"
+    # "Llama70B_Bitext:2e-6:10"
     # "Llama70B:2e-6:10"
     
     # "QuoraDuplicates:5e-6:10"

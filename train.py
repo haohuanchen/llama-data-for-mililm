@@ -30,7 +30,7 @@ def load_data(path):
             if not line:
                 continue
             datas.append(json.loads(line))
-            break
+            # break
     return datas
 
 
