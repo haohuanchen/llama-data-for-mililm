@@ -5,11 +5,11 @@ models=(
     # "Llama8B_Bitext:2e-6:10"
     # "Llama8B:2e-6:10"
 
-    # "Llama70B_STS:5e-6:10"
+    "Llama70B_STS:5e-6:10"
     # "Llama70B_Bitext:2e-6:10"
     # "Llama70B:2e-6:10"
     
-    # "QuoraDuplicates:5e-6:10"
+    "QuoraDuplicates:5e-6:10"
     # "Allnli:2e-6:10"
     # "Public:2e-6:10"
 )
@@ -36,7 +36,7 @@ train_model() {
 
     data_path="data/${model}.jsonl"
 
-    python -m train \
+    accelerate launch -m train \
         --config configs/train.yaml \
         --model_name ${model} \
         --data_path ${data_path} \

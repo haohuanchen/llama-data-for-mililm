@@ -2,6 +2,7 @@ import numpy as np
 import json
 from tqdm import tqdm
 from jsonargparse import auto_cli
+from accelerate import Accelerator
 
 import torch
 import torch.nn.functional as F
@@ -53,18 +54,20 @@ def main(
         batch_size: int = None,
         epochs: int = None,
         max_len: int = None,
-        lr: float = None,
-        device: str = None
+        lr: float = None
 ):
+    accelerator = Accelerator()
+    device = accelerator.device
+
     tokenizer = AutoTokenizer.from_pretrained("intfloat/multilingual-e5-base")
-    
     model = MiniLMSentenceTransformer(vocab_size=tokenizer.vocab_size)
-    model.to(device)
 
     datas = load_data(data_path)
     dataloader = DataLoader(datas, batch_size=batch_size, shuffle=True)
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
+
+    model, optimizer, dataloader = accelerator.prepare(model, optimizer, dataloader)
 
     model.train()
     for epoch in range(epochs):
@@ -106,17 +109,22 @@ def main(
 
             loss = info_nce_loss(q_emb, p_emb, n_emb)
             optimizer.zero_grad()
-            loss.backward()
+            accelerator.backward(loss)
             optimizer.step()
 
             total_loss += loss.item()
 
-        avg_loss = total_loss / len(dataloader)
-        print(f"Average loss = {avg_loss:.4f}")
+        if accelerator.is_local_main_process:
+            avg_loss = total_loss / len(dataloader)
+            print(f"Average loss = {avg_loss:.4f}")
 
-        model_revision = f"{model_name}_E{epoch+1}"
-        model.set_revision(model_revision)
-        torch.save(model.state_dict(), f"{save_path}/{model_revision}.pt")
+            model_revision = f"{model_name}_E{epoch+1}"
+            unwrapped = accelerator.unwrap_model(model)
+            unwrapped.set_revision(model_revision)
+            accelerator.save(unwrapped.state_dict(), f"{save_path}/{model_revision}.pt")
+    
+    accelerator.wait_for_everyone()
+    accelerator.end_training()
 
 
 if __name__ == '__main__':
