@@ -8,6 +8,7 @@ import torch
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from transformers import AutoTokenizer
+from transformers import get_cosine_schedule_with_warmup
 
 from models import MiniLMSentenceTransformer
 
@@ -67,7 +68,13 @@ def main(
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr)
 
-    model, optimizer, dataloader = accelerator.prepare(model, optimizer, dataloader)
+    total_steps = len(dataloader) * epochs
+    warmup_steps = int(total_steps * 0.06)
+    scheduler = get_cosine_schedule_with_warmup(optimizer, warmup_steps, total_steps)
+
+    model, optimizer, dataloader, scheduler = accelerator.prepare(
+        model, optimizer, dataloader, scheduler
+    )
 
     model.train()
     for epoch in range(epochs):
@@ -111,6 +118,7 @@ def main(
             optimizer.zero_grad()
             accelerator.backward(loss)
             optimizer.step()
+            scheduler.step()
 
             total_loss += loss.item()
 
