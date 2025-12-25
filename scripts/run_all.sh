@@ -1,17 +1,17 @@
 #!/bin/bash
 
 models=(
-    "Llama8B_STS:5e-6:10"
-    # "Llama8B_Bitext:2e-6:10"
-    # "Llama8B:2e-6:10"
+    "Llama8B_STS:2e-5:10"
+    "Llama8B_Bitext:2e-5:10"
 
-    "Llama70B_STS:5e-6:10"
-    # "Llama70B_Bitext:2e-6:10"
-    # "Llama70B:2e-6:10"
+    "Llama70B_STS:2e-5:10"
+    "Llama70B_Bitext:2e-5:10"
     
-    "QuoraDuplicates:5e-6:10"
-    # "Allnli:2e-6:10"
-    # "Public:2e-6:10"
+    "QuoraDuplicates:2e-5:10"
+    "Allnli:2e-5:10"
+
+    "Llama8B_STS_Quora:2e-5:10"
+    "Llama70B_STS_Quora:2e-5:10"
 )
 
 train_model() {
